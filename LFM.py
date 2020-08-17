@@ -30,18 +30,13 @@ def LFM(R: np.ndarray, P: np.ndarray, Q: np.ndarray, K: int, steps=5000, learnin
         for i in range(len(R)):
             for j in range(len(R[0])):
                 eij = R[i][j] - P[i, :] @ Q[:, j]
-                print('Pi', P[i, :])
-                print('Qj', Q[:, j])
-                print('eij', eij)
                 for k in range(K):
                     P[i][k] = P[i][k] + learning_rate * (eij * Q[k][j] - beta * P[i][k])
                     Q[k][j] = Q[k][j] + learning_rate * (eij * P[i][k] - beta * Q[k][j])
-        print("第%d次" % t)
         loss.append(get_loss(R, P, Q, K, beta))
-        print('loss:', loss)
+        print("第%d次迭代的损失值为:%lf" % (t+1, loss[-1]))
         if loss[-1] <= min_loss:
             break
-        print(abs(loss[-1] - loss[-2]), min_interval, abs(loss[-1] - loss[-2]) <= min_interval)
         if abs(loss[-1] - loss[-2]) <= min_interval:
             break
     return P, Q.T, loss
@@ -160,10 +155,8 @@ if __name__ == '__main__':
     beta = 0
     steps = 10
     P, Q = init_P_Q(np.array(R), K)
-
-    print(get_loss(np.array(R), P, Q.T, K))
     P, Q, loss = LFM(np.array(R), P, Q, K, learning_rate=learning_rate, steps=steps, beta=beta)
-    print(loss)
+    # print(loss)
     plot_loss(loss, learning_rate=learning_rate)
     R_hat = P @ Q.T
     R_hat = pd.DataFrame(R_hat, index=R.index, columns=R.columns)
